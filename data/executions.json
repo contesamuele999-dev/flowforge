@@ -1,0 +1,832 @@
+[
+  {
+    "id": "exec_1781554201478_2rbnsz",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T20:10:01.478Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "node_mqfn3piu1af6l",
+        "nodeName": "Gmail",
+        "type": "gmail",
+        "status": "error",
+        "error": "HTTP 401: Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+        "durationMs": 168
+      }
+    ],
+    "error": "Errore nel nodo \"Gmail\": HTTP 401: Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+    "durationMs": 168,
+    "finishedAt": "2026-06-15T20:10:01.646Z",
+    "lastOutput": null
+  },
+  {
+    "id": "exec_1781553910143_59nuam",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T20:05:10.143Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+        "durationMs": 2103
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 503: This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "durationMs": 2103,
+    "finishedAt": "2026-06-15T20:05:12.246Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553890107_6bancd",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T20:04:50.107Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "success",
+        "durationMs": 2377,
+        "output": [
+          {
+            "risposta": "Un workflow no-code è una sequenza automatizzata di passaggi o azioni che viene progettata e implementata senza scrivere una singola riga di codice. Gli utenti costruiscono questi flussi trascinando e rilasciando componenti predefiniti o connettendo diverse applicazioni tramite interfacce visive intuitive. Ciò permette a chiunque, anche senza competenze tecniche, di automatizzare processi, integrare sistemi e creare soluzioni personalizzate in modo rapido ed efficiente.",
+            "model": "gemini-2.5-flash",
+            "provider": "gemini",
+            "raw": {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Un workflow no-code è una sequenza automatizzata di passaggi o azioni che viene progettata e implementata senza scrivere una singola riga di codice. Gli utenti costruiscono questi flussi trascinando e rilasciando componenti predefiniti o connettendo diverse applicazioni tramite interfacce visive intuitive. Ciò permette a chiunque, anche senza competenze tecniche, di automatizzare processi, integrare sistemi e creare soluzioni personalizzate in modo rapido ed efficiente."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 16,
+                "candidatesTokenCount": 97,
+                "totalTokenCount": 395,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 16
+                  }
+                ],
+                "thoughtsTokenCount": 282,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "4lowap2YCMTn7M8Pq_zO0A0"
+            }
+          }
+        ]
+      },
+      {
+        "nodeId": "node_mqfn3piu1af6l",
+        "nodeName": "Gmail",
+        "type": "gmail",
+        "status": "error",
+        "error": "HTTP 401: Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+        "durationMs": 4126
+      }
+    ],
+    "error": "Errore nel nodo \"Gmail\": HTTP 401: Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.",
+    "durationMs": 6503,
+    "finishedAt": "2026-06-15T20:04:56.610Z",
+    "lastOutput": [
+      {
+        "risposta": "Un workflow no-code è una sequenza automatizzata di passaggi o azioni che viene progettata e implementata senza scrivere una singola riga di codice. Gli utenti costruiscono questi flussi trascinando e rilasciando componenti predefiniti o connettendo diverse applicazioni tramite interfacce visive intuitive. Ciò permette a chiunque, anche senza competenze tecniche, di automatizzare processi, integrare sistemi e creare soluzioni personalizzate in modo rapido ed efficiente.",
+        "model": "gemini-2.5-flash",
+        "provider": "gemini",
+        "raw": {
+          "candidates": [
+            {
+              "content": {
+                "parts": [
+                  {
+                    "text": "Un workflow no-code è una sequenza automatizzata di passaggi o azioni che viene progettata e implementata senza scrivere una singola riga di codice. Gli utenti costruiscono questi flussi trascinando e rilasciando componenti predefiniti o connettendo diverse applicazioni tramite interfacce visive intuitive. Ciò permette a chiunque, anche senza competenze tecniche, di automatizzare processi, integrare sistemi e creare soluzioni personalizzate in modo rapido ed efficiente."
+                  }
+                ],
+                "role": "model"
+              },
+              "finishReason": "STOP",
+              "index": 0
+            }
+          ],
+          "usageMetadata": {
+            "promptTokenCount": 16,
+            "candidatesTokenCount": 97,
+            "totalTokenCount": 395,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 16
+              }
+            ],
+            "thoughtsTokenCount": 282,
+            "serviceTier": "standard"
+          },
+          "modelVersion": "gemini-2.5-flash",
+          "responseId": "4lowap2YCMTn7M8Pq_zO0A0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553718441_9o12hu",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T20:01:58.441Z",
+    "status": "success",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "success",
+        "durationMs": 6659,
+        "output": [
+          {
+            "risposta": "Un workflow no-code è una sequenza di passaggi o attività che vengono automatizzati all'interno di un processo. Viene progettato e gestito utilizzando interfacce grafiche intuitive e strumenti drag-and-drop, senza la necessità di scrivere codice di programmazione. Ciò permette anche a utenti non tecnici di creare automazioni complesse per ottimizzare flussi di lavoro e integrare diverse applicazioni.",
+            "model": "gemini-2.5-flash",
+            "provider": "gemini",
+            "raw": {
+              "candidates": [
+                {
+                  "content": {
+                    "parts": [
+                      {
+                        "text": "Un workflow no-code è una sequenza di passaggi o attività che vengono automatizzati all'interno di un processo. Viene progettato e gestito utilizzando interfacce grafiche intuitive e strumenti drag-and-drop, senza la necessità di scrivere codice di programmazione. Ciò permette anche a utenti non tecnici di creare automazioni complesse per ottimizzare flussi di lavoro e integrare diverse applicazioni."
+                      }
+                    ],
+                    "role": "model"
+                  },
+                  "finishReason": "STOP",
+                  "index": 0
+                }
+              ],
+              "usageMetadata": {
+                "promptTokenCount": 16,
+                "candidatesTokenCount": 84,
+                "totalTokenCount": 1141,
+                "promptTokensDetails": [
+                  {
+                    "modality": "TEXT",
+                    "tokenCount": 16
+                  }
+                ],
+                "thoughtsTokenCount": 1041,
+                "serviceTier": "standard"
+              },
+              "modelVersion": "gemini-2.5-flash",
+              "responseId": "NlowapKXI5runsEPkIWw-AE"
+            }
+          }
+        ]
+      }
+    ],
+    "durationMs": 6659,
+    "finishedAt": "2026-06-15T20:02:05.100Z",
+    "lastOutput": [
+      {
+        "risposta": "Un workflow no-code è una sequenza di passaggi o attività che vengono automatizzati all'interno di un processo. Viene progettato e gestito utilizzando interfacce grafiche intuitive e strumenti drag-and-drop, senza la necessità di scrivere codice di programmazione. Ciò permette anche a utenti non tecnici di creare automazioni complesse per ottimizzare flussi di lavoro e integrare diverse applicazioni.",
+        "model": "gemini-2.5-flash",
+        "provider": "gemini",
+        "raw": {
+          "candidates": [
+            {
+              "content": {
+                "parts": [
+                  {
+                    "text": "Un workflow no-code è una sequenza di passaggi o attività che vengono automatizzati all'interno di un processo. Viene progettato e gestito utilizzando interfacce grafiche intuitive e strumenti drag-and-drop, senza la necessità di scrivere codice di programmazione. Ciò permette anche a utenti non tecnici di creare automazioni complesse per ottimizzare flussi di lavoro e integrare diverse applicazioni."
+                  }
+                ],
+                "role": "model"
+              },
+              "finishReason": "STOP",
+              "index": 0
+            }
+          ],
+          "usageMetadata": {
+            "promptTokenCount": 16,
+            "candidatesTokenCount": 84,
+            "totalTokenCount": 1141,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 16
+              }
+            ],
+            "thoughtsTokenCount": 1041,
+            "serviceTier": "standard"
+          },
+          "modelVersion": "gemini-2.5-flash",
+          "responseId": "NlowapKXI5runsEPkIWw-AE"
+        }
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553696318_37jhkc",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T20:01:36.318Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 400: API key not valid. Please pass a valid API key.",
+        "durationMs": 53
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 400: API key not valid. Please pass a valid API key.",
+    "durationMs": 53,
+    "finishedAt": "2026-06-15T20:01:36.371Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553692841_jbkow0",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T20:01:32.841Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 400: API key not valid. Please pass a valid API key.",
+        "durationMs": 261
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 400: API key not valid. Please pass a valid API key.",
+    "durationMs": 261,
+    "finishedAt": "2026-06-15T20:01:33.102Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553512773_r0axtg",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T19:58:32.773Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 401: Incorrect API key provided: sk-efgh5*******************************5678. You can find your API key at https://platform.openai.com/account/api-keys.",
+        "durationMs": 217
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 401: Incorrect API key provided: sk-efgh5*******************************5678. You can find your API key at https://platform.openai.com/account/api-keys.",
+    "durationMs": 218,
+    "finishedAt": "2026-06-15T19:58:32.991Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553490010_yfl9so",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T19:58:10.010Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 401: Incorrect API key provided: sk-efgh5*******************************5678. You can find your API key at https://platform.openai.com/account/api-keys.",
+        "durationMs": 296
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 401: Incorrect API key provided: sk-efgh5*******************************5678. You can find your API key at https://platform.openai.com/account/api-keys.",
+    "durationMs": 296,
+    "finishedAt": "2026-06-15T19:58:10.306Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553371531_wyxx9h",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T19:56:11.531Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 401: Incorrect API key provided: undefined. You can find your API key at https://platform.openai.com/account/api-keys.",
+        "durationMs": 219
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 401: Incorrect API key provided: undefined. You can find your API key at https://platform.openai.com/account/api-keys.",
+    "durationMs": 219,
+    "finishedAt": "2026-06-15T19:56:11.750Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553366895_d0m82x",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T19:56:06.895Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 401: Incorrect API key provided: undefined. You can find your API key at https://platform.openai.com/account/api-keys.",
+        "durationMs": 218
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 401: Incorrect API key provided: undefined. You can find your API key at https://platform.openai.com/account/api-keys.",
+    "durationMs": 218,
+    "finishedAt": "2026-06-15T19:56:07.113Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781553357036_uaax3c",
+    "workflowId": "wf_1781553343377_yxmqoq",
+    "workflowName": "AI playground (manuale)",
+    "startedAt": "2026-06-15T19:55:57.036Z",
+    "status": "error",
+    "nodeResults": [
+      {
+        "nodeId": "man",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "set",
+        "nodeName": "Il tuo prompt",
+        "type": "set",
+        "status": "success",
+        "durationMs": 1,
+        "output": [
+          {
+            "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+          }
+        ]
+      },
+      {
+        "nodeId": "llm",
+        "nodeName": "LLM",
+        "type": "llm",
+        "status": "error",
+        "error": "HTTP 401: Incorrect API key provided: undefined. You can find your API key at https://platform.openai.com/account/api-keys.",
+        "durationMs": 306
+      }
+    ],
+    "error": "Errore nel nodo \"LLM\": HTTP 401: Incorrect API key provided: undefined. You can find your API key at https://platform.openai.com/account/api-keys.",
+    "durationMs": 307,
+    "finishedAt": "2026-06-15T19:55:57.343Z",
+    "lastOutput": [
+      {
+        "prompt": "Spiega cos'è un workflow no-code in 3 frasi."
+      }
+    ]
+  },
+  {
+    "id": "exec_1781453871237_94pqja",
+    "workflowId": "wf_1781453756653_mzogos",
+    "workflowName": "Nuovo workflow",
+    "startedAt": "2026-06-14T16:17:51.237Z",
+    "status": "success",
+    "nodeResults": [
+      {
+        "nodeId": "node_mqdzknanrh1vs",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "node_mqdzl53byvpz2",
+        "nodeName": "Code",
+        "type": "code",
+        "status": "success",
+        "durationMs": 1,
+        "output": [
+          {
+            "elaborato": true
+          }
+        ]
+      }
+    ],
+    "durationMs": 1,
+    "finishedAt": "2026-06-14T16:17:51.238Z",
+    "lastOutput": [
+      {
+        "elaborato": true
+      }
+    ]
+  },
+  {
+    "id": "exec_1781453745183_tuwijw",
+    "workflowId": "wf_1781125308443_zl3bd7",
+    "workflowName": "Esempio: trigger → code → IF → HTTP",
+    "startedAt": "2026-06-14T16:15:45.183Z",
+    "status": "success",
+    "nodeResults": [
+      {
+        "nodeId": "n1",
+        "nodeName": "Manual Trigger",
+        "type": "manualTrigger",
+        "status": "success",
+        "durationMs": 1,
+        "output": [
+          {}
+        ]
+      },
+      {
+        "nodeId": "n2",
+        "nodeName": "Edit Fields",
+        "type": "set",
+        "status": "success",
+        "durationMs": 1,
+        "output": [
+          {
+            "prezzo": "42",
+            "saluto": "ciao "
+          }
+        ]
+      },
+      {
+        "nodeId": "n3",
+        "nodeName": "Code",
+        "type": "code",
+        "status": "success",
+        "durationMs": 1,
+        "logs": [
+          "items: 1"
+        ],
+        "output": [
+          {
+            "prezzo": "42",
+            "saluto": "ciao ",
+            "doppio": 84
+          }
+        ]
+      },
+      {
+        "nodeId": "n4",
+        "nodeName": "IF",
+        "type": "if",
+        "status": "success",
+        "durationMs": 2,
+        "output": {
+          "true": [
+            {
+              "prezzo": "42",
+              "saluto": "ciao ",
+              "doppio": 84
+            }
+          ],
+          "false": []
+        }
+      },
+      {
+        "nodeId": "n5",
+        "nodeName": "Ramo true",
+        "type": "set",
+        "status": "success",
+        "durationMs": 0,
+        "output": [
+          {
+            "prezzo": "42",
+            "saluto": "ciao ",
+            "doppio": 84,
+            "esito": "caro"
+          }
+        ]
+      },
+      {
+        "nodeId": "n7",
+        "nodeName": "HTTP Request",
+        "type": "httpRequest",
+        "status": "success",
+        "durationMs": 58,
+        "output": [
+          {
+            "statusCode": 200,
+            "body": [
+              {
+                "id": "wf_1781125308443_zl3bd7",
+                "name": "Esempio: trigger → code → IF → HTTP",
+                "active": false,
+                "nodeCount": 7,
+                "updatedAt": "2026-06-14T16:15:45.177Z",
+                "createdAt": "2026-06-10T21:01:48.443Z"
+              },
+              {
+                "id": "wf_1781125308539_91ujkg",
+                "name": "Esempio: webhook con risposta",
+                "active": false,
+                "nodeCount": 2,
+                "updatedAt": "2026-06-10T21:01:48.541Z",
+                "createdAt": "2026-06-10T21:01:48.541Z"
+              }
+            ],
+            "headers": {
+              "connection": "keep-alive",
+              "content-length": "371",
+              "content-type": "application/json; charset=utf-8",
+              "date": "Sun, 14 Jun 2026 16:15:45 GMT",
+              "etag": "W/\"173-lgaJ4qQ0O8bbey5iVDGvt/rUcmI\"",
+              "keep-alive": "timeout=5",
+              "x-powered-by": "Express"
+            }
+          }
+        ]
+      }
+    ],
+    "durationMs": 63,
+    "finishedAt": "2026-06-14T16:15:45.246Z",
+    "lastOutput": [
+      {
+        "statusCode": 200,
+        "body": [
+          {
+            "id": "wf_1781125308443_zl3bd7",
+            "name": "Esempio: trigger → code → IF → HTTP",
+            "active": false,
+            "nodeCount": 7,
+            "updatedAt": "2026-06-14T16:15:45.177Z",
+            "createdAt": "2026-06-10T21:01:48.443Z"
+          },
+          {
+            "id": "wf_1781125308539_91ujkg",
+            "name": "Esempio: webhook con risposta",
+            "active": false,
+            "nodeCount": 2,
+            "updatedAt": "2026-06-10T21:01:48.541Z",
+            "createdAt": "2026-06-10T21:01:48.541Z"
+          }
+        ],
+        "headers": {
+          "connection": "keep-alive",
+          "content-length": "371",
+          "content-type": "application/json; charset=utf-8",
+          "date": "Sun, 14 Jun 2026 16:15:45 GMT",
+          "etag": "W/\"173-lgaJ4qQ0O8bbey5iVDGvt/rUcmI\"",
+          "keep-alive": "timeout=5",
+          "x-powered-by": "Express"
+        }
+      }
+    ]
+  }
+]

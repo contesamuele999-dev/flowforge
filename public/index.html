@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowForge — No-Code Automation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Sidebar: lista workflow -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo">⚡ FlowForge</span>
+    </div>
+    <button id="btn-new-workflow" class="btn btn-primary btn-block">+ Nuovo workflow</button>
+    <button id="btn-template" class="btn btn-block">📋 Da template</button>
+    <button id="btn-import" class="btn btn-block">📥 Importa JSON</button>
+    <div id="workflow-list"></div>
+    <button id="btn-vars" class="btn btn-block" title="Chiavi e segreti riusabili in tutti i workflow">🔑 Variabili globali</button>
+  </aside>
+
+  <!-- Area principale -->
+  <main id="main">
+    <header id="topbar">
+      <input id="wf-name" type="text" placeholder="Nome workflow" />
+      <div class="topbar-right">
+        <label class="toggle" title="Attiva/disattiva (webhook e schedule funzionano solo se attivo)">
+          <input type="checkbox" id="wf-active">
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">Attivo</span>
+        </label>
+        <div class="topbar-divider"></div>
+        <button id="btn-executions" class="btn btn-ghost" title="Storico esecuzioni"><span class="btn-ico">🕑</span><span class="btn-txt">Esecuzioni</span></button>
+        <button id="btn-export" class="btn btn-ghost" title="Esporta questo workflow come JSON"><span class="btn-ico">⤓</span><span class="btn-txt">Esporta</span></button>
+        <button id="btn-add-node" class="btn" title="Aggiungi un nodo"><span class="btn-ico">＋</span><span class="btn-txt">Nodo</span></button>
+        <button id="btn-save" class="btn" title="Salva il workflow (Ctrl+S)"><span class="btn-ico">💾</span><span class="btn-txt">Salva</span></button>
+        <button id="btn-run" class="btn btn-primary" title="Esegui il workflow"><span class="btn-ico">▶</span><span class="btn-txt">Esegui</span></button>
+      </div>
+    </header>
+
+    <!-- Canvas -->
+    <div id="canvas-wrap">
+      <div id="canvas">
+        <svg id="connections"></svg>
+        <div id="nodes-layer"></div>
+      </div>
+      <div id="canvas-hint">Doppio click sul canvas o "+ Nodo" per aggiungere un nodo</div>
+      <div id="zoom-controls">
+        <button id="zoom-out" title="Zoom out">−</button>
+        <button id="zoom-reset" title="Reset zoom">⊙</button>
+        <button id="zoom-in" title="Zoom in">+</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Pannello configurazione nodo -->
+  <aside id="config-panel" class="hidden">
+    <div class="panel-header">
+      <span id="config-title">Configura nodo</span>
+      <button id="config-close" class="btn-icon">✕</button>
+    </div>
+    <div id="config-body"></div>
+    <div class="panel-footer">
+      <div class="panel-actions">
+        <button id="btn-runnode-node" class="btn" title="Esegui solo questo nodo in isolamento">▶ Solo questo</button>
+        <button id="btn-runfrom-node" class="btn" title="Esegui il workflow partendo da questo nodo">▶ Da qui</button>
+        <button id="btn-dup-node" class="btn" title="Duplica nodo (Ctrl+D)">⧉ Duplica</button>
+        <button id="btn-toggle-node" class="btn">Disabilita</button>
+        <button id="btn-delete-node" class="btn btn-danger">Elimina</button>
+      </div>
+      <button id="btn-save-node" class="btn btn-primary btn-block" title="Salva il workflow (Ctrl+S)">💾 Salva modifiche</button>
+    </div>
+  </aside>
+
+  <!-- Palette nodi (modal) -->
+  <div id="palette-overlay" class="overlay hidden">
+    <div id="palette">
+      <div class="panel-header">
+        <span>Aggiungi un nodo</span>
+        <button id="palette-close" class="btn-icon">✕</button>
+      </div>
+      <input id="palette-search" type="text" placeholder="Cerca nodo...">
+      <div id="palette-list"></div>
+    </div>
+  </div>
+
+  <!-- Pannello esecuzioni (modal) -->
+  <div id="exec-overlay" class="overlay hidden">
+    <div id="exec-panel">
+      <div class="panel-header">
+        <span>Esecuzioni</span>
+        <button id="exec-close" class="btn-icon">✕</button>
+      </div>
+      <div id="exec-content">
+        <div id="exec-list"></div>
+        <div id="exec-detail"><div class="muted">Seleziona un'esecuzione per i dettagli</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Variabili globali (modal) -->
+  <div id="vars-overlay" class="overlay hidden">
+    <div class="modal">
+      <div class="panel-header">
+        <span>🔑 Variabili globali</span>
+        <button id="vars-close" class="btn-icon">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-hint" style="margin-bottom:10px">Usale in qualsiasi campo o nel nodo Code con <b>{{ $vars.NOME }}</b>. Salvate sul server e condivise da tutti i workflow — niente più chiavi ripetute.</div>
+        <div id="vars-list"></div>
+        <button id="vars-add" class="add-row-btn">+ Aggiungi variabile</button>
+      </div>
+      <div class="panel-footer">
+        <button id="vars-save" class="btn btn-primary btn-block">Salva variabili</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import / Export (modal) -->
+  <div id="io-overlay" class="overlay hidden">
+    <div class="modal">
+      <div class="panel-header">
+        <span id="io-title">JSON</span>
+        <button id="io-close" class="btn-icon">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="io-hint" class="form-hint" style="margin-bottom:8px"></div>
+        <textarea id="io-text" spellcheck="false"></textarea>
+      </div>
+      <div class="panel-footer" id="io-actions"></div>
+    </div>
+  </div>
+
+  <!-- Template (modal) -->
+  <div id="tpl-overlay" class="overlay hidden">
+    <div class="modal">
+      <div class="panel-header">
+        <span>📋 Nuovo da template</span>
+        <button id="tpl-close" class="btn-icon">✕</button>
+      </div>
+      <div class="modal-body" id="tpl-list"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden"></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

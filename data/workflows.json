@@ -1,0 +1,463 @@
+[
+  {
+    "id": "wf_1781125308443_zl3bd7",
+    "name": "Esempio: trigger → code → IF → HTTP",
+    "active": false,
+    "nodes": [
+      {
+        "id": "n1",
+        "type": "manualTrigger",
+        "name": "Manual Trigger",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "parameters": {}
+      },
+      {
+        "id": "n2",
+        "type": "set",
+        "name": "Edit Fields",
+        "position": {
+          "x": 250,
+          "y": 0
+        },
+        "parameters": {
+          "fields": [
+            {
+              "name": "prezzo",
+              "value": "42"
+            },
+            {
+              "name": "saluto",
+              "value": "ciao {{ $json.prezzo }}"
+            }
+          ]
+        }
+      },
+      {
+        "id": "n3",
+        "type": "code",
+        "name": "Code",
+        "position": {
+          "x": 500,
+          "y": 0
+        },
+        "parameters": {
+          "code": "console.log('items:', items.length); return items.map(i => ({...i, doppio: Number(i.prezzo)*2}));"
+        }
+      },
+      {
+        "id": "n4",
+        "type": "if",
+        "name": "IF",
+        "position": {
+          "x": 750,
+          "y": 0
+        },
+        "parameters": {
+          "value1": "{{ $json.doppio }}",
+          "operator": "gt",
+          "value2": "50"
+        }
+      },
+      {
+        "id": "n5",
+        "type": "set",
+        "name": "Ramo true",
+        "position": {
+          "x": 1000,
+          "y": -80
+        },
+        "parameters": {
+          "fields": [
+            {
+              "name": "esito",
+              "value": "caro"
+            }
+          ]
+        }
+      },
+      {
+        "id": "n6",
+        "type": "set",
+        "name": "Ramo false",
+        "position": {
+          "x": 1000,
+          "y": 80
+        },
+        "parameters": {
+          "fields": [
+            {
+              "name": "esito",
+              "value": "economico"
+            }
+          ]
+        }
+      },
+      {
+        "id": "n7",
+        "type": "httpRequest",
+        "name": "HTTP Request",
+        "position": {
+          "x": 1250,
+          "y": -80
+        },
+        "parameters": {
+          "method": "GET",
+          "url": "http://localhost:5678/api/workflows",
+          "headers": [],
+          "body": ""
+        }
+      }
+    ],
+    "connections": [
+      {
+        "from": "n1",
+        "fromOutput": 0,
+        "to": "n2"
+      },
+      {
+        "from": "n2",
+        "fromOutput": 0,
+        "to": "n3"
+      },
+      {
+        "from": "n3",
+        "fromOutput": 0,
+        "to": "n4"
+      },
+      {
+        "from": "n4",
+        "fromOutput": 0,
+        "to": "n5"
+      },
+      {
+        "from": "n4",
+        "fromOutput": 1,
+        "to": "n6"
+      },
+      {
+        "from": "n5",
+        "fromOutput": 0,
+        "to": "n7"
+      }
+    ],
+    "updatedAt": "2026-06-14T16:15:45.177Z",
+    "createdAt": "2026-06-10T21:01:48.443Z"
+  },
+  {
+    "id": "wf_1781125308539_91ujkg",
+    "name": "Esempio: webhook con risposta",
+    "active": false,
+    "nodes": [
+      {
+        "id": "w1",
+        "type": "webhook",
+        "name": "Webhook",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "parameters": {
+          "path": "prova",
+          "method": "ANY"
+        }
+      },
+      {
+        "id": "w2",
+        "type": "set",
+        "name": "Risposta",
+        "position": {
+          "x": 250,
+          "y": 0
+        },
+        "parameters": {
+          "fields": [
+            {
+              "name": "ricevuto",
+              "value": "{{ $json.body.nome }}"
+            }
+          ],
+          "keepOnlySet": true
+        }
+      }
+    ],
+    "connections": [
+      {
+        "from": "w1",
+        "fromOutput": 0,
+        "to": "w2"
+      }
+    ],
+    "updatedAt": "2026-06-10T21:01:48.541Z",
+    "createdAt": "2026-06-10T21:01:48.541Z"
+  },
+  {
+    "id": "wf_1781453756653_mzogos",
+    "name": "Nuovo workflow",
+    "active": false,
+    "nodes": [
+      {
+        "id": "node_mqdzknanrh1vs",
+        "type": "manualTrigger",
+        "name": "Manual Trigger",
+        "position": {
+          "x": 99,
+          "y": -282
+        },
+        "parameters": {}
+      },
+      {
+        "id": "node_mqdzl53byvpz2",
+        "type": "code",
+        "name": "Code",
+        "position": {
+          "x": 335,
+          "y": -170
+        },
+        "parameters": {
+          "code": "// items = array degli item in ingresso\n// Restituisci un array di oggetti\nreturn items.map(item => ({\n  ...item,\n  elaborato: true\n}));"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "from": "node_mqdzknanrh1vs",
+        "fromOutput": 0,
+        "to": "node_mqdzl53byvpz2"
+      }
+    ],
+    "updatedAt": "2026-06-14T16:17:51.234Z",
+    "createdAt": "2026-06-14T16:15:56.653Z"
+  },
+  {
+    "id": "wf_digest_meeting",
+    "name": "Digest meeting → Claude → Email",
+    "active": false,
+    "nodes": [
+      {
+        "id": "sch",
+        "type": "schedule",
+        "name": "Ogni mattina 08:00",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "parameters": {
+          "mode": "dailyAt",
+          "time": "08:00",
+          "minutes": 5,
+          "hours": 1
+        }
+      },
+      {
+        "id": "cfg",
+        "type": "set",
+        "name": "Config",
+        "position": {
+          "x": 240,
+          "y": 0
+        },
+        "parameters": {
+          "keepOnlySet": true,
+          "fields": [
+            {
+              "name": "anthropic_key",
+              "value": "sk-ant-INSERISCI_LA_TUA_CHIAVE"
+            },
+            {
+              "name": "fathom_key",
+              "value": "fathom_api_INSERISCI_LA_TUA_CHIAVE"
+            },
+            {
+              "name": "resend_key",
+              "value": "re_INSERISCI_LA_TUA_CHIAVE"
+            }
+          ]
+        }
+      },
+      {
+        "id": "fth",
+        "type": "fathom",
+        "name": "Fathom Meetings",
+        "position": {
+          "x": 480,
+          "y": 0
+        },
+        "parameters": {
+          "operation": "listMeetings",
+          "apiKey": "{{ $node[\"Config\"][0].fathom_key }}",
+          "includeTranscript": true,
+          "includeHighlights": false,
+          "createdAfter": ""
+        }
+      },
+      {
+        "id": "cod",
+        "type": "code",
+        "name": "Prepara prompt",
+        "position": {
+          "x": 720,
+          "y": 0
+        },
+        "parameters": {
+          "code": "const ms = items.filter(x => x && x.title); const blob = ms.map(x => 'Meeting: ' + x.title + '\\nTrascrizione: ' + String(x.transcript || '').slice(0, 4000)).join('\\n\\n---\\n\\n'); return [{ prompt: 'Riassumi in italiano questi meeting, con punti chiave e action item per ciascuno:\\n\\n' + (blob || 'Nessun meeting recente da riassumere.') }];"
+        }
+      },
+      {
+        "id": "llm",
+        "type": "llm",
+        "name": "Claude riassume",
+        "position": {
+          "x": 960,
+          "y": 0
+        },
+        "parameters": {
+          "provider": "anthropic",
+          "apiKey": "{{ $node[\"Config\"][0].anthropic_key }}",
+          "model": "claude-sonnet-4-6",
+          "system": "Sei un assistente che scrive riassunti chiari e sintetici in italiano.",
+          "prompt": "{{ $json.prompt }}",
+          "maxTokens": 1500
+        }
+      },
+      {
+        "id": "eml",
+        "type": "email",
+        "name": "Invia digest",
+        "position": {
+          "x": 1200,
+          "y": 0
+        },
+        "parameters": {
+          "provider": "resend",
+          "apiKey": "{{ $node[\"Config\"][0].resend_key }}",
+          "from": "Digest <noreply@tuodominio.it>",
+          "to": "umasterinfo@gmail.com",
+          "subject": "Digest meeting di oggi",
+          "html": "<div style=\"font-family:sans-serif;white-space:pre-wrap\">{{ $json.risposta }}</div>"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "from": "sch",
+        "fromOutput": 0,
+        "to": "cfg"
+      },
+      {
+        "from": "cfg",
+        "fromOutput": 0,
+        "to": "fth"
+      },
+      {
+        "from": "fth",
+        "fromOutput": 0,
+        "to": "cod"
+      },
+      {
+        "from": "cod",
+        "fromOutput": 0,
+        "to": "llm"
+      },
+      {
+        "from": "llm",
+        "fromOutput": 0,
+        "to": "eml"
+      }
+    ],
+    "updatedAt": "2026-06-15T13:05:00.000Z",
+    "createdAt": "2026-06-15T13:05:00.000Z"
+  },
+  {
+    "id": "wf_1781553343377_yxmqoq",
+    "name": "AI playground (manuale)",
+    "active": false,
+    "nodes": [
+      {
+        "id": "man",
+        "type": "manualTrigger",
+        "name": "Manual Trigger",
+        "position": {
+          "x": -1,
+          "y": 0
+        },
+        "parameters": {}
+      },
+      {
+        "id": "set",
+        "type": "set",
+        "name": "Il tuo prompt",
+        "position": {
+          "x": 245,
+          "y": -30
+        },
+        "parameters": {
+          "keepOnlySet": true,
+          "fields": [
+            {
+              "name": "prompt",
+              "value": "Spiega cos'è un workflow no-code in 3 frasi."
+            }
+          ]
+        }
+      },
+      {
+        "id": "llm",
+        "type": "llm",
+        "name": "LLM",
+        "position": {
+          "x": 480,
+          "y": 0
+        },
+        "parameters": {
+          "provider": "gemini",
+          "apiKey": "AQ.Ab8RN6Llu69vj8Wy9mvzXyFPOwvj67NU7Rvh1f1YGo9IzLsQ7w",
+          "model": "gemini-2.5-flash",
+          "system": "",
+          "prompt": "{{ $json.prompt }}",
+          "maxTokens": 800
+        }
+      },
+      {
+        "id": "node_mqfn3piu1af6l",
+        "type": "gmail",
+        "name": "Gmail",
+        "position": {
+          "x": 720,
+          "y": -38
+        },
+        "parameters": {
+          "operation": "send",
+          "accessToken": "388708541272-vq1mtsetftaer92bilohpvo9l5j0cte3.apps.googleusercontent.com",
+          "to": "umasterinfo@gmail.com",
+          "subject": "prova",
+          "text": "{{ $json.risposta }}",
+          "query": "is:unread",
+          "maxResults": 10,
+          "messageId": "{{ $json.id }}"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "from": "man",
+        "fromOutput": 0,
+        "to": "set"
+      },
+      {
+        "from": "set",
+        "fromOutput": 0,
+        "to": "llm"
+      },
+      {
+        "from": "llm",
+        "fromOutput": 0,
+        "to": "node_mqfn3piu1af6l"
+      }
+    ],
+    "updatedAt": "2026-06-15T20:10:01.476Z",
+    "createdAt": "2026-06-15T19:55:43.378Z"
+  }
+]
