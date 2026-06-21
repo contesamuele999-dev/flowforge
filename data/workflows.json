@@ -413,7 +413,7 @@
         },
         "parameters": {
           "provider": "gemini",
-          "apiKey": "AQ.Ab8RN6Llu69vj8Wy9mvzXyFPOwvj67NU7Rvh1f1YGo9IzLsQ7w",
+          "apiKey": "",
           "model": "gemini-2.5-flash",
           "system": "",
           "prompt": "{{ $json.prompt }}",
