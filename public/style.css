@@ -223,6 +223,19 @@ body {
   border-radius: 7px; padding: 10px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; resize: vertical;
 }
 .modal-body textarea:focus { outline: none; border-color: var(--primary); }
+
+/* ---- Account ---- */
+#account-box { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); }
+#btn-account { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-label { display: block; font-size: 11px; color: var(--text-muted); margin: 10px 0 5px; font-weight: 600; }
+.acc-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+  padding: 9px 11px; border-radius: 7px; font-size: 13px;
+}
+.acc-input:focus { outline: none; border-color: var(--primary); }
+.acc-msg { font-size: 13px; text-align: center; min-height: 18px; margin-top: 14px; }
+.acc-msg.error { color: var(--error); }
+.acc-msg.success { color: var(--success); }
 .tpl-item { padding: 12px 14px; border: 1px solid var(--border); border-radius: 9px; cursor: pointer; margin-bottom: 8px; }
 .tpl-item:hover { border-color: var(--primary); background: var(--bg-3); }
 .tpl-item .tpl-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
@@ -257,6 +270,45 @@ body {
 .io-tag { font-size: 10px; padding: 1px 7px; border-radius: 9px; font-weight: 700; }
 .io-tag.ok { background: rgba(76,175,125,.18); color: var(--success); }
 .io-tag.err { background: rgba(224,82,82,.18); color: var(--error); }
+
+/* ---- Albero JSON trascinabile (Input) ---- */
+.json-tree {
+  background: #14141c; border-top: 1px solid var(--border); padding: 8px 10px;
+  max-height: 260px; overflow: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 11.5px;
+}
+.jt-children { margin-left: 12px; border-left: 1px solid var(--border); padding-left: 8px; }
+.jt-node > .jt-key { color: var(--text-muted); font-weight: 700; display: block; padding: 2px 0; }
+.jt-empty { color: var(--text-muted); padding: 2px 0; }
+.jt-leaf {
+  display: flex; gap: 6px; align-items: baseline; padding: 3px 6px; margin: 1px 0;
+  border: 1px solid transparent; border-radius: 6px; cursor: grab; user-select: none;
+}
+.jt-leaf:hover { background: var(--bg-3); border-color: var(--border); }
+.jt-leaf:active { cursor: grabbing; }
+.jt-leaf.dragging { opacity: .5; }
+.jt-leaf .jt-key { color: #8ab4ff; flex-shrink: 0; }
+.jt-leaf .jt-val { word-break: break-word; }
+.jt-leaf .jt-val.str { color: #b8e0c8; }
+.jt-leaf .jt-val.num { color: var(--warn); }
+.jt-leaf .jt-val.bool { color: var(--primary); }
+
+/* campo evidenziato durante il drag-over */
+.drop-target { outline: 2px dashed var(--primary) !important; outline-offset: 1px; background: rgba(255,109,90,.08) !important; }
+
+/* menù di scelta al rilascio */
+.drop-choice {
+  position: fixed; z-index: 9999; background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 4px; box-shadow: 0 8px 28px rgba(0,0,0,.5); min-width: 180px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.drop-choice button {
+  text-align: left; background: none; border: none; color: var(--text); cursor: pointer;
+  padding: 7px 10px; border-radius: 7px; display: flex; flex-direction: column; gap: 2px; font-family: inherit;
+}
+.drop-choice button:hover { background: var(--bg-3); }
+.drop-choice button b { font-size: 12.5px; }
+.drop-choice button span { font-size: 10.5px; color: var(--text-muted); font-family: 'Consolas','Monaco',monospace; word-break: break-all; }
+
 .node.disabled { opacity: 0.45; }
 .node.disabled .node-name::after { content: ' (off)'; color: var(--text-muted); font-weight: 400; }
 #palette-search {

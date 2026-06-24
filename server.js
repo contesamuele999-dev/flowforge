@@ -1,19 +1,41 @@
 // server.js - FlowForge: clone semplificato di n8n
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const storage = require('./storage');
+const auth = require('./auth');
 const { executeWorkflow, executeSingleNode } = require('./engine');
 
 const app = express();
 const PORT = process.env.PORT || 5678;
 
 app.use(express.json({ limit: '5mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
 
-// ---- API Workflows ----
+// ---- Pagine pubbliche (login) servite prima dello static ----
+// La pagina di login è accessibile senza autenticazione.
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+
+// File statici (css, js, favicon, login.html). L'index.html è protetto a parte sotto.
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+
+// ---- API di autenticazione (pubbliche) ----
+app.post('/api/auth/register', auth.register);
+app.post('/api/auth/login', auth.login);
+app.post('/api/auth/logout', auth.logout);
+
+// ---- API account (protette) ----
+app.get('/api/auth/me', auth.requireAuth, auth.me);
+app.post('/api/auth/change-password', auth.requireAuth, auth.changePassword);
+app.post('/api/auth/change-email', auth.requireAuth, auth.changeEmail);
+
+// ---- Tutte le altre /api richiedono autenticazione ----
+app.use('/api', auth.requireAuth);
+
+// ---- API Workflows (scoped sull'utente loggato) ----
 app.get('/api/workflows', async (req, res) => {
   try {
-    const workflows = await storage.getWorkflows();
+    const workflows = await storage.getWorkflows(req.user.id);
     res.json(workflows.map(w => ({
       id: w.id, name: w.name, active: w.active,
       nodeCount: (w.nodes || []).length,
@@ -24,7 +46,7 @@ app.get('/api/workflows', async (req, res) => {
 
 app.get('/api/workflows/:id', async (req, res) => {
   try {
-    const w = await storage.getWorkflow(req.params.id);
+    const w = await storage.getWorkflow(req.params.id, req.user.id);
     if (!w) return res.status(404).json({ error: 'Workflow non trovato' });
     res.json(w);
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -39,52 +61,53 @@ app.post('/api/workflows', async (req, res) => {
       nodes: req.body.nodes || [],
       connections: req.body.connections || [],
     };
-    await storage.saveWorkflow(w);
+    await storage.saveWorkflow(w, req.user.id);
     res.json(w);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.put('/api/workflows/:id', async (req, res) => {
   try {
-    const existing = await storage.getWorkflow(req.params.id);
+    const existing = await storage.getWorkflow(req.params.id, req.user.id);
     if (!existing) return res.status(404).json({ error: 'Workflow non trovato' });
     const w = { ...existing, ...req.body, id: existing.id, createdAt: existing.createdAt };
-    await storage.saveWorkflow(w);
+    await storage.saveWorkflow(w, req.user.id);
     res.json(w);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.delete('/api/workflows/:id', async (req, res) => {
   try {
-    await storage.deleteWorkflow(req.params.id);
+    await storage.deleteWorkflow(req.params.id, req.user.id);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ---- Variabili globali ----
+// ---- Variabili globali (per-utente) ----
 app.get('/api/vars', async (req, res) => {
-  try { res.json(await storage.getVars()); }
+  try { res.json(await storage.getVars(req.user.id)); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.put('/api/vars', async (req, res) => {
-  try { res.json(await storage.saveVars(req.body || {})); }
+  try { res.json(await storage.saveVars(req.body || {}, req.user.id)); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ---- Esecuzione manuale ----
 app.post('/api/workflows/:id/execute', async (req, res) => {
   try {
-    const w = await storage.getWorkflow(req.params.id);
+    const uid = req.user.id;
+    const w = await storage.getWorkflow(req.params.id, uid);
     if (!w) return res.status(404).json({ error: 'Workflow non trovato' });
-    const vars = await storage.getVars();
+    const vars = await storage.getVars(uid);
     let exec;
     if (req.body?.singleNodeId) {
       exec = await executeSingleNode(w, req.body.singleNodeId, req.body?.input, vars);
     } else {
       exec = await executeWorkflow(w, req.body?.data || {}, req.body?.triggerNodeId, vars);
     }
-    await storage.saveExecution(exec);
+    await storage.saveExecution(exec, uid);
     res.json(exec);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -92,7 +115,7 @@ app.post('/api/workflows/:id/execute', async (req, res) => {
 // ---- Esecuzioni ----
 app.get('/api/executions', async (req, res) => {
   try {
-    const list = (await storage.getExecutions(req.query.workflowId)).map(e => ({
+    const list = (await storage.getExecutions(req.query.workflowId, req.user.id)).map(e => ({
       id: e.id, workflowId: e.workflowId, workflowName: e.workflowName,
       status: e.status, startedAt: e.startedAt, durationMs: e.durationMs, error: e.error,
     }));
@@ -102,28 +125,28 @@ app.get('/api/executions', async (req, res) => {
 
 app.get('/api/executions/:id', async (req, res) => {
   try {
-    const e = await storage.getExecution(req.params.id);
+    const e = await storage.getExecution(req.params.id, req.user.id);
     if (!e) return res.status(404).json({ error: 'Esecuzione non trovata' });
     res.json(e);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ---- Webhook trigger ----
+// ---- Webhook trigger (pubblico: esegue nel contesto del proprietario del workflow) ----
 app.all('/webhook/:path(*)', async (req, res) => {
   try {
     const hookPath = req.params.path;
-    const workflows = (await storage.getWorkflows()).filter(w => w.active);
-    const vars = await storage.getVars();
-    for (const w of workflows) {
+    const all = await storage.getAllActiveWorkflowsWithOwner();
+    for (const { userId, workflow: w } of all) {
       const trigger = (w.nodes || []).find(n =>
         n.type === 'webhook' &&
         (n.parameters?.path || '').replace(/^\//, '') === hookPath &&
         (!n.parameters?.method || n.parameters.method === 'ANY' || n.parameters.method === req.method)
       );
       if (trigger) {
+        const vars = await storage.getVars(userId);
         const data = { body: req.body, query: req.query, headers: req.headers, method: req.method };
         const exec = await executeWorkflow(w, data, trigger.id, vars);
-        await storage.saveExecution(exec);
+        await storage.saveExecution(exec, userId);
         if (exec.status === 'error') return res.status(500).json({ error: exec.error, executionId: exec.id });
         return res.json({ executionId: exec.id, output: exec.lastOutput });
       }
@@ -132,13 +155,21 @@ app.all('/webhook/:path(*)', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ---- Scheduler ----
+// ---- App protetta: l'editor (index.html) richiede login ----
+// Se non autenticato, redirect a /login.
+app.get(['/', '/index.html'], (req, res) => {
+  const token = req.cookies?.[auth.COOKIE_NAME];
+  if (!token) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ---- Scheduler (esegue ogni workflow nel contesto del suo proprietario) ----
 const lastRuns = new Map();
 setInterval(async () => {
   const now = new Date();
   try {
-    for (const w of await storage.getWorkflows()) {
-      if (!w.active) continue;
+    const all = await storage.getAllActiveWorkflowsWithOwner();
+    for (const { userId, workflow: w } of all) {
       for (const node of (w.nodes || [])) {
         if (node.type !== 'schedule') continue;
         const key = w.id + ':' + node.id;
@@ -159,9 +190,9 @@ setInterval(async () => {
         if (due) {
           lastRuns.set(key, Date.now());
           try {
-            const vars = await storage.getVars();
+            const vars = await storage.getVars(userId);
             const exec = await executeWorkflow(w, {}, node.id, vars);
-            await storage.saveExecution(exec);
+            await storage.saveExecution(exec, userId);
             console.log(`[scheduler] ${w.name}: ${exec.status} (${exec.durationMs}ms)`);
           } catch (e) {
             console.error(`[scheduler] errore in ${w.name}:`, e.message);

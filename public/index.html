@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlowForge — No-Code Automation</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="alternate icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,6 +20,11 @@
     <button id="btn-import" class="btn btn-block">📥 Importa JSON</button>
     <div id="workflow-list"></div>
     <button id="btn-vars" class="btn btn-block" title="Chiavi e segreti riusabili in tutti i workflow">🔑 Variabili globali</button>
+    <div id="account-box">
+      <button id="btn-account" class="btn btn-block" title="Gestisci il tuo account">
+        <span id="account-email">👤 Account</span>
+      </button>
+    </div>
   </aside>
 
   <!-- Area principale -->
@@ -140,6 +147,43 @@
         <button id="tpl-close" class="btn-icon">✕</button>
       </div>
       <div class="modal-body" id="tpl-list"></div>
+    </div>
+  </div>
+
+  <!-- Account (modal) -->
+  <div id="account-overlay" class="overlay hidden">
+    <div class="modal">
+      <div class="panel-header">
+        <span>👤 Il mio account</span>
+        <button id="account-close" class="btn-icon">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-hint" style="margin-bottom:6px">Accesso come</div>
+        <div id="account-current-email" style="font-weight:600;margin-bottom:18px"></div>
+
+        <div style="border-top:1px solid var(--border);padding-top:16px">
+          <div style="font-weight:700;margin-bottom:10px">✉️ Cambia email</div>
+          <label class="acc-label">Nuova email</label>
+          <input id="acc-new-email" type="email" class="acc-input" placeholder="nuova@esempio.it">
+          <label class="acc-label">Password attuale (conferma)</label>
+          <input id="acc-email-pw" type="password" class="acc-input" placeholder="••••••••">
+          <button id="acc-save-email" class="btn btn-primary btn-block" style="margin-top:12px">Aggiorna email</button>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:18px">
+          <div style="font-weight:700;margin-bottom:10px">🔒 Cambia password</div>
+          <label class="acc-label">Password attuale</label>
+          <input id="acc-cur-pw" type="password" class="acc-input" placeholder="••••••••">
+          <label class="acc-label">Nuova password (min 8 caratteri)</label>
+          <input id="acc-new-pw" type="password" class="acc-input" placeholder="••••••••">
+          <button id="acc-save-pw" class="btn btn-primary btn-block" style="margin-top:12px">Aggiorna password</button>
+        </div>
+
+        <div id="acc-msg" class="acc-msg"></div>
+      </div>
+      <div class="panel-footer">
+        <button id="btn-logout" class="btn btn-danger btn-block">Esci (logout)</button>
+      </div>
     </div>
   </div>
 

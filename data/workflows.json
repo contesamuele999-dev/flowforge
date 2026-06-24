@@ -1,6 +1,6 @@
 [
   {
-    "id": "wf_1781125308443_zl3bd7",
+    "id": "chiavediprova",
     "name": "Esempio: trigger → code → IF → HTTP",
     "active": false,
     "nodes": [
@@ -413,7 +413,7 @@
         },
         "parameters": {
           "provider": "gemini",
-          "apiKey": "",
+          "apiKey": "apidiprova",
           "model": "gemini-2.5-flash",
           "system": "",
           "prompt": "{{ $json.prompt }}",

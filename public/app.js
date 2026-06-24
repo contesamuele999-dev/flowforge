@@ -325,8 +325,10 @@ function toast(msg, type = '') {
 async function api(method, url, body) {
   const res = await fetch(url, {
     method, headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
     body: body ? JSON.stringify(body) : undefined,
   });
+  if (res.status === 401) { window.location.href = '/login'; throw new Error('Sessione scaduta'); }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || res.statusText);
   return data;
@@ -471,6 +473,12 @@ function renderNodes() {
       if (el._dragged) return;
       e.stopPropagation();
       selectNode(node.id);
+    });
+    el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectNode(node.id);
+      nodeContextMenu(e.clientX, e.clientY, node);
     });
     nodesLayer.appendChild(el);
   }
@@ -732,7 +740,19 @@ function selectNode(id) {
   $('config-panel').classList.remove('hidden');
 }
 
-// Mostra input e output del nodo dall'ultima esecuzione (se disponibili)
+// Ricava l'input "atteso" dal nodo precedente collegato, anche se questo
+// nodo non è ancora stato eseguito. Restituisce { value, fromName } o null.
+function inputFromPrevious(node) {
+  if (!wf) return null;
+  const conn = wf.connections.find(c => c.to === node.id);
+  if (!conn) return null;
+  const prev = wf.nodes.find(n => n.id === conn.from);
+  const prevData = lastExecData[conn.from];
+  if (!prevData || prevData.output === undefined) return null;
+  return { value: prevData.output, fromName: prev ? prev.name : conn.from };
+}
+
+// Mostra input e output del nodo. L'input è trascinabile nei campi.
 function renderNodeIO(body, node) {
   const data = lastExecData[node.id];
   const section = document.createElement('div');
@@ -740,41 +760,64 @@ function renderNodeIO(body, node) {
 
   const title = document.createElement('div');
   title.className = 'node-io-title';
-  title.textContent = 'Dati ultima esecuzione';
+  title.textContent = 'Dati di input / output';
   section.appendChild(title);
 
-  if (!data) {
+  const count = v => Array.isArray(v) ? `${v.length} item` : (v == null ? '–' : '1');
+
+  // ---- INPUT ----
+  let inputValue, inputHint;
+  if (data && data.input !== undefined) {
+    inputValue = data.input;
+    inputHint = 'Dall\'ultima esecuzione di questo nodo';
+  } else {
+    const prev = inputFromPrevious(node);
+    if (prev) {
+      inputValue = prev.value;
+      inputHint = `Anteprima: output di "${prev.fromName}" (nodo precedente)`;
+    }
+  }
+
+  if (inputValue !== undefined) {
+    const blk = ioBlock('Input', inputValue, count(inputValue), true, '', true);
+    if (inputHint) {
+      const h = document.createElement('div');
+      h.className = 'form-hint';
+      h.style.margin = '2px 0 8px';
+      h.textContent = inputHint + ' · trascina un valore in un campo per usarlo';
+      blk.appendChild(h);
+    }
+    section.appendChild(blk);
+  } else {
     const empty = document.createElement('div');
     empty.className = 'io-empty';
-    empty.textContent = 'Nessun dato. Esegui il workflow o usa "▶ Solo questo" per vedere input e output.';
+    empty.textContent = 'Nessun input disponibile. Esegui il nodo precedente (o il workflow) per vedere e trascinare i dati.';
     section.appendChild(empty);
-    body.appendChild(section);
-    return;
   }
 
-  if (data.error) {
-    const banner = document.createElement('div');
-    banner.className = 'exec-error-banner';
-    banner.textContent = data.error;
-    section.appendChild(banner);
+  // ---- OUTPUT ----
+  if (data) {
+    if (data.error) {
+      const banner = document.createElement('div');
+      banner.className = 'exec-error-banner';
+      banner.textContent = data.error;
+      section.appendChild(banner);
+    }
+    if (data.logs && data.logs.length) {
+      const logs = document.createElement('div');
+      logs.className = 'form-hint';
+      logs.style.marginBottom = '8px';
+      logs.textContent = 'console: ' + data.logs.join(' | ');
+      section.appendChild(logs);
+    }
+    const okTag = data.status && data.status !== 'error' ? ' ok' : (data.status === 'error' ? ' err' : '');
+    section.appendChild(ioBlock('Output', data.output, count(data.output), false, okTag));
   }
-  if (data.logs && data.logs.length) {
-    const logs = document.createElement('div');
-    logs.className = 'form-hint';
-    logs.style.marginBottom = '8px';
-    logs.textContent = 'console: ' + data.logs.join(' | ');
-    section.appendChild(logs);
-  }
-
-  const count = v => Array.isArray(v) ? `${v.length} item` : (v == null ? '–' : '1');
-  section.appendChild(ioBlock('Input', data.input, count(data.input), false));
-  const okTag = data.status && data.status !== 'error' ? ' ok' : (data.status === 'error' ? ' err' : '');
-  section.appendChild(ioBlock('Output', data.output, count(data.output), true, okTag));
 
   body.appendChild(section);
 }
 
-function ioBlock(label, value, countText, open, tagClass) {
+function ioBlock(label, value, countText, open, tagClass, draggable) {
   const det = document.createElement('details');
   det.className = 'io-block';
   if (open) det.open = true;
@@ -783,10 +826,87 @@ function ioBlock(label, value, countText, open, tagClass) {
     (tagClass ? `<span class="io-tag${tagClass}">${tagClass.includes('err') ? 'errore' : 'ok'}</span>` : '') +
     `<span class="io-count">${countText}</span>`;
   det.appendChild(sum);
-  const pre = document.createElement('pre');
-  pre.textContent = value === undefined ? '(nessun dato)' : JSON.stringify(value, null, 2);
-  det.appendChild(pre);
+  if (draggable) {
+    // Albero JSON con foglie trascinabili
+    const tree = document.createElement('div');
+    tree.className = 'json-tree';
+    // Se l'input è un array di item, il riferimento punta al primo item ($json)
+    const root = Array.isArray(value) ? (value[0] ?? {}) : value;
+    buildJsonTree(tree, root, '');
+    det.appendChild(tree);
+  } else {
+    const pre = document.createElement('pre');
+    pre.textContent = value === undefined ? '(nessun dato)' : JSON.stringify(value, null, 2);
+    det.appendChild(pre);
+  }
   return det;
+}
+
+// Costruisce un albero navigabile; ogni foglia è trascinabile e porta con sé
+// sia il path (per il riferimento {{ $json.path }}) sia il valore letterale.
+function buildJsonTree(container, value, path) {
+  const isObj = value && typeof value === 'object';
+  if (!isObj) {
+    container.appendChild(jsonLeaf(path, value));
+    return;
+  }
+  const entries = Array.isArray(value)
+    ? value.map((v, i) => [String(i), v])
+    : Object.entries(value);
+  if (!entries.length) {
+    const e = document.createElement('div');
+    e.className = 'jt-empty';
+    e.textContent = Array.isArray(value) ? '[ ]' : '{ }';
+    container.appendChild(e);
+    return;
+  }
+  for (const [k, v] of entries) {
+    const childPath = Array.isArray(value) ? `${path}[${k}]` : (path ? `${path}.${k}` : k);
+    const vIsObj = v && typeof v === 'object';
+    if (vIsObj) {
+      const row = document.createElement('div');
+      row.className = 'jt-node';
+      const key = document.createElement('span');
+      key.className = 'jt-key';
+      key.textContent = Array.isArray(value) ? `[${k}]` : k;
+      key.appendChild(document.createTextNode(Array.isArray(v) ? `  ${v.length} item` : ''));
+      row.appendChild(key);
+      const sub = document.createElement('div');
+      sub.className = 'jt-children';
+      buildJsonTree(sub, v, childPath);
+      row.appendChild(sub);
+      container.appendChild(row);
+    } else {
+      container.appendChild(jsonLeaf(childPath, v, Array.isArray(value) ? `[${k}]` : k));
+    }
+  }
+}
+
+function jsonLeaf(path, value, keyLabel) {
+  const leaf = document.createElement('div');
+  leaf.className = 'jt-leaf';
+  leaf.draggable = true;
+  const ref = '{{ $json' + (path ? (path[0] === '[' ? path : '.' + path) : '') + ' }}';
+  const literal = value == null ? '' : String(value);
+  leaf.dataset.ref = ref;
+  leaf.dataset.literal = literal;
+  leaf.title = 'Trascina nel campo · ' + ref;
+  const key = document.createElement('span');
+  key.className = 'jt-key';
+  key.textContent = (keyLabel != null ? keyLabel : path) + ':';
+  const val = document.createElement('span');
+  val.className = 'jt-val ' + (typeof value === 'number' ? 'num' : typeof value === 'boolean' ? 'bool' : 'str');
+  val.textContent = JSON.stringify(value);
+  leaf.append(key, val);
+  leaf.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('application/x-flowforge-ref', ref);
+    e.dataTransfer.setData('application/x-flowforge-literal', literal);
+    e.dataTransfer.setData('text/plain', ref);
+    e.dataTransfer.effectAllowed = 'copy';
+    leaf.classList.add('dragging');
+  });
+  leaf.addEventListener('dragend', () => leaf.classList.remove('dragging'));
+  return leaf;
 }
 
 function formGroup(labelText, inputEl, hintText) {
@@ -803,6 +923,59 @@ function formGroup(labelText, inputEl, hintText) {
     g.appendChild(h);
   }
   return g;
+}
+
+// Rende un input/textarea una zona di rilascio per i valori trascinati dall'input.
+// Al drop chiede se inserire il riferimento dinamico {{ $json.. }} o il valore letterale.
+function makeDroppable(el, onCommit) {
+  el.addEventListener('dragover', e => {
+    if (e.dataTransfer.types.includes('application/x-flowforge-ref')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      el.classList.add('drop-target');
+    }
+  });
+  el.addEventListener('dragleave', () => el.classList.remove('drop-target'));
+  el.addEventListener('drop', e => {
+    const ref = e.dataTransfer.getData('application/x-flowforge-ref');
+    if (!ref) return;
+    e.preventDefault();
+    el.classList.remove('drop-target');
+    const literal = e.dataTransfer.getData('application/x-flowforge-literal');
+    dropChoice(e.clientX, e.clientY, ref, literal, chosen => {
+      // inserisce alla posizione del cursore (o sostituisce la selezione)
+      const start = el.selectionStart ?? el.value.length;
+      const end = el.selectionEnd ?? el.value.length;
+      el.value = el.value.slice(0, start) + chosen + el.value.slice(end);
+      const caret = start + chosen.length;
+      el.focus();
+      try { el.setSelectionRange(caret, caret); } catch (_) {}
+      onCommit(el.value);
+    });
+  });
+}
+
+// Mini menù a comparsa: Riferimento vs Valore.
+function dropChoice(x, y, ref, literal, cb) {
+  document.querySelectorAll('.drop-choice').forEach(m => m.remove());
+  const menu = document.createElement('div');
+  menu.className = 'drop-choice';
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  const mk = (label, sub, val) => {
+    const b = document.createElement('button');
+    b.innerHTML = `<b>${label}</b><span>${sub}</span>`;
+    b.onclick = () => { menu.remove(); cb(val); };
+    return b;
+  };
+  menu.appendChild(mk('Riferimento', escapeHtml(ref), ref));
+  menu.appendChild(mk('Valore', escapeHtml(literal.length > 40 ? literal.slice(0, 40) + '…' : literal) || '(vuoto)', literal));
+  document.body.appendChild(menu);
+  // chiusura al click fuori
+  setTimeout(() => {
+    const close = ev => { if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('mousedown', close); } };
+    document.addEventListener('mousedown', close);
+  }, 0);
 }
 
 function renderField(body, node, field) {
@@ -834,6 +1007,7 @@ function renderField(body, node, field) {
       input.value = p[field.name] ?? '';
       input.spellcheck = false;
       input.oninput = () => { p[field.name] = input.value; dirty = true; };
+      makeDroppable(input, v => { p[field.name] = v; dirty = true; });
       break;
     }
     case 'number': {
@@ -879,6 +1053,7 @@ function renderField(body, node, field) {
           const v = document.createElement('input');
           v.type = 'text'; v.placeholder = field.valLabel || 'valore'; v.value = row.value || '';
           v.oninput = () => { row.value = v.value; dirty = true; };
+          makeDroppable(v, val => { row.value = val; dirty = true; });
           const del = document.createElement('button');
           del.className = 'btn-icon'; del.textContent = '✕';
           del.onclick = () => { rows().splice(idx, 1); dirty = true; redraw(); };
@@ -899,6 +1074,7 @@ function renderField(body, node, field) {
       input.type = 'text';
       input.value = p[field.name] ?? '';
       input.oninput = () => { p[field.name] = input.value; dirty = true; };
+      makeDroppable(input, v => { p[field.name] = v; dirty = true; });
     }
   }
   body.appendChild(formGroup(field.label, input, field.hint));
@@ -935,6 +1111,29 @@ function duplicateSelectedNode() {
   render();
   selectNode(clone.id);
   toast('Nodo duplicato', 'success');
+}
+
+// Menu contestuale (tasto destro) su un nodo
+function nodeContextMenu(x, y, node) {
+  document.querySelectorAll('.node-ctx').forEach(m => m.remove());
+  const menu = document.createElement('div');
+  menu.className = 'drop-choice node-ctx';
+  menu.style.left = x + 'px';
+  menu.style.top = y + 'px';
+  const item = (label, fn) => {
+    const b = document.createElement('button');
+    b.innerHTML = `<b>${label}</b>`;
+    b.onclick = () => { menu.remove(); fn(); };
+    return b;
+  };
+  menu.appendChild(item('⧉ Duplica nodo  (Ctrl+D)', duplicateSelectedNode));
+  menu.appendChild(item(node.disabled ? '◉ Abilita nodo' : '◯ Disabilita nodo', toggleSelectedNodeDisabled));
+  menu.appendChild(item('🗑 Elimina nodo  (Canc)', deleteSelectedNode));
+  document.body.appendChild(menu);
+  setTimeout(() => {
+    const close = ev => { if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('mousedown', close); } };
+    document.addEventListener('mousedown', close);
+  }, 0);
 }
 
 function toggleSelectedNodeDisabled() {
@@ -1301,13 +1500,76 @@ window.addEventListener('keydown', e => {
   }
   if (e.key === 'Escape') {
     closePalette();
-    ['exec-overlay', 'vars-overlay', 'io-overlay', 'tpl-overlay'].forEach(id => $(id).classList.add('hidden'));
+    ['exec-overlay', 'vars-overlay', 'io-overlay', 'tpl-overlay', 'account-overlay'].forEach(id => $(id).classList.add('hidden'));
   }
 });
 window.addEventListener('beforeunload', e => { if (dirty) e.preventDefault(); });
+// ============ Account ============
+let currentUser = null;
+
+async function loadAccount() {
+  try {
+    currentUser = await api('GET', '/api/auth/me');
+    $('account-email').textContent = '👤 ' + currentUser.email;
+  } catch { /* api() reindirizza già al login se 401 */ }
+}
+
+function accMsg(text, type = '') {
+  const m = $('acc-msg');
+  m.textContent = text; m.className = 'acc-msg ' + type;
+}
+
+function openAccount() {
+  $('account-current-email').textContent = currentUser ? currentUser.email : '';
+  $('acc-new-email').value = '';
+  $('acc-email-pw').value = '';
+  $('acc-cur-pw').value = '';
+  $('acc-new-pw').value = '';
+  accMsg('');
+  $('account-overlay').classList.remove('hidden');
+}
+
+async function logout() {
+  try { await api('POST', '/api/auth/logout'); } catch {}
+  window.location.href = '/login';
+}
+
+async function saveNewEmail() {
+  const newEmail = $('acc-new-email').value.trim();
+  const password = $('acc-email-pw').value;
+  if (!newEmail || !password) return accMsg('Compila email e password attuale', 'error');
+  try {
+    const u = await api('POST', '/api/auth/change-email', { newEmail, password });
+    currentUser = u;
+    $('account-email').textContent = '👤 ' + u.email;
+    $('account-current-email').textContent = u.email;
+    $('acc-new-email').value = ''; $('acc-email-pw').value = '';
+    accMsg('Email aggiornata ✓', 'success');
+  } catch (e) { accMsg(e.message, 'error'); }
+}
+
+async function saveNewPassword() {
+  const currentPassword = $('acc-cur-pw').value;
+  const newPassword = $('acc-new-pw').value;
+  if (!currentPassword || !newPassword) return accMsg('Compila entrambi i campi password', 'error');
+  if (newPassword.length < 8) return accMsg('La nuova password deve avere almeno 8 caratteri', 'error');
+  try {
+    await api('POST', '/api/auth/change-password', { currentPassword, newPassword });
+    $('acc-cur-pw').value = ''; $('acc-new-pw').value = '';
+    accMsg('Password aggiornata ✓', 'success');
+  } catch (e) { accMsg(e.message, 'error'); }
+}
+
+$('btn-account').onclick = openAccount;
+$('account-close').onclick = () => $('account-overlay').classList.add('hidden');
+$('account-overlay').onclick = e => { if (e.target.id === 'account-overlay') $('account-overlay').classList.add('hidden'); };
+$('btn-logout').onclick = logout;
+$('acc-save-email').onclick = saveNewEmail;
+$('acc-save-pw').onclick = saveNewPassword;
 
 // ============ Avvio ============
 (async function init() {
+  await loadAccount();
   await loadWorkflowList();
   if (workflows.length) openWorkflow(workflows[0].id);
 })();
