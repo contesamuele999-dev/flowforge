@@ -59,6 +59,9 @@ begin
   end if;
 end $$;
 alter table vars add column if not exists user_id text;
+-- pulizia: rimuovi righe orfane (user_id null) PRIMA della PK, altrimenti
+-- la primary key (user_id, key) fallisce con errore 23502 (null value).
+delete from vars where user_id is null;
 -- chiave primaria composta (un utente non può avere due var con lo stesso nome)
 do $$
 begin

@@ -7,7 +7,9 @@ const storage = require('./storage');
 // Segreto per firmare i token. In produzione IMPOSTALO come variabile d'ambiente.
 const JWT_SECRET = process.env.JWT_SECRET || 'flowforge-dev-secret-CAMBIAMI';
 const COOKIE_NAME = 'ff_session';
-const TOKEN_TTL = '30d';
+const TOKEN_TTL = '30d';        // "Ricordami" attivo: sessione lunga
+const TOKEN_TTL_SHORT = '1d';   // "Ricordami" disattivo: sessione breve
+const REMEMBER_MS = 30 * 24 * 60 * 60 * 1000; // 30 giorni
 
 if (!process.env.JWT_SECRET) {
   console.warn('[auth] ATTENZIONE: JWT_SECRET non impostato, uso un valore di default insicuro. Impostalo in produzione!');
@@ -16,18 +18,23 @@ if (!process.env.JWT_SECRET) {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const normEmail = (e) => String(e || '').trim().toLowerCase();
 
-function signToken(user) {
-  return jwt.sign({ uid: user.id, email: user.email }, JWT_SECRET, { expiresIn: TOKEN_TTL });
+function signToken(user, remember) {
+  return jwt.sign({ uid: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: remember ? TOKEN_TTL : TOKEN_TTL_SHORT,
+  });
 }
 
-function setSessionCookie(res, user) {
-  const token = signToken(user);
-  res.cookie(COOKIE_NAME, token, {
+function setSessionCookie(res, user, remember) {
+  const token = signToken(user, remember);
+  const cookie = {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 giorni
-  });
+  };
+  // Ricordami: cookie persistente 30 giorni. Altrimenti cookie di sessione
+  // (nessun maxAge) che scade alla chiusura del browser.
+  if (remember) cookie.maxAge = REMEMBER_MS;
+  res.cookie(COOKIE_NAME, token, cookie);
 }
 
 function clearSessionCookie(res) {
@@ -66,7 +73,7 @@ async function register(req, res) {
       password_hash: await bcrypt.hash(password, 10),
     };
     await storage.createUser(user);
-    setSessionCookie(res, user);
+    setSessionCookie(res, user, !!req.body?.remember);
     res.json({ id: user.id, email: user.email });
   } catch (e) { res.status(500).json({ error: e.message }); }
 }
@@ -79,7 +86,7 @@ async function login(req, res) {
     // confronto sempre (anche se utente assente) per non rivelare l'esistenza dell'account
     const ok = user ? await bcrypt.compare(password, user.password_hash) : false;
     if (!user || !ok) return res.status(401).json({ error: 'Email o password errati' });
-    setSessionCookie(res, user);
+    setSessionCookie(res, user, !!req.body?.remember);
     res.json({ id: user.id, email: user.email });
   } catch (e) { res.status(500).json({ error: e.message }); }
 }
@@ -121,7 +128,7 @@ async function changeEmail(req, res) {
       if (taken) return res.status(409).json({ error: 'Email già in uso da un altro account' });
     }
     const updated = await storage.updateUser(user.id, { email: newEmail });
-    setSessionCookie(res, updated); // rinnova il token con la nuova email
+    setSessionCookie(res, updated, true); // rinnova la sessione attiva con la nuova email
     res.json({ id: updated.id, email: updated.email });
   } catch (e) { res.status(500).json({ error: e.message }); }
 }
